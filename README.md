@@ -1,7 +1,8 @@
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
+## Screeshots Link : 
+https://github.com/ManpreetVB/Foddie-react/tree/main/screenshots%20frontend%20output
 ## Available Scripts
 
 In the project directory, you can run:
