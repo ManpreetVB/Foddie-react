@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import AdminHeader from "./AdminHeader";
 
 const ProductManagement = () => {
   const [products, setProducts] = useState([]);
@@ -153,7 +154,9 @@ const ProductManagement = () => {
   };
 
   return (
+    <>
     <div>
+    <AdminHeader/>
       <div className="container"><h2>Product Management</h2></div>
 <div className="container"mx-2 my-2>
       {/* Add/Update Product Form */}
@@ -289,6 +292,7 @@ const ProductManagement = () => {
         </tbody>
       </table>
     </div>
+    </>
   );
 };
 export default ProductManagement;

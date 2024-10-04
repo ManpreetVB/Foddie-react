@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import AdminHeader from './AdminHeader';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -48,7 +49,8 @@ const ProductList = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div>
+    <>
+    <AdminHeader/>
       <h1>Product List</h1>
       <table className="table table-hover">
         <thead>
@@ -96,7 +98,7 @@ const ProductList = () => {
           )}
         </tbody>
       </table>
-    </div>
+    </>
   );
 };
 

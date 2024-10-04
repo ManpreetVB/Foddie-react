@@ -1,106 +1,110 @@
-import React,{useState,useEffect} from "react";
-import axios from "axios";
-import Header from "./Header";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import Header from './Header';
+
 const ProductDisplay = () => {
-    const [data, setData] = useState([]);
-  const [ quantity, setOrderQuantity] = useState(1);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    getData();
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('http://localhost:5013/api/Admin/ProductList');
+        // Access the `listProducts` field correctly
+        const productList = response.data.response.listProducts;
+        setProducts(productList || []);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError('Failed to fetch products');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
-
-  const getData = () => {
-    const data = {
-      Email: "Admin",
-    };
-    const url = `http://localhost:5013/api/Admin/cartList`;
-    axios
-      .post(url, data)
-      .then((result) => {
-        const data = result.data;
-        if (data.statusCode === 200) {
-          setData(data.listCart);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  const AddToCart = async (productId) => {
+    try {
+      await axios.post('http://localhost:5013/api/Product/AddToCart', { productId });
+      alert('Product added to cart');
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      alert('Failed to add product to cart');
+    }
   };
 
-  const handleAddToCart = (e, userId) => {
-    e.preventDefault();
-    const data = {
-      UserId: userId,
-      Quantity : quantity,
-      Email: localStorage.getItem("username"),
-    };
-    const url = `http://localhost:5013/api/Product/AddToCart`;
-    axios
-      .post(url, data)
-      .then((result) => {
-        const dt = result.data;
-        if (dt.statusCode === 200) {
-          getData();
-          alert(dt.statusMessage);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-    return(
-<>
-<Header />
-      <br></br>  
-      <div
-        style={{
-          backgroundColor: "white",
-          width: "80%",
-          margin: "0 auto",
-          borderRadius: "11px",
-        }}
-      >
-        <div className="card-deck">
-          {data && data.length > 0
-            ? data.map((val, index) => {
-                return (
-                  <div
-                    key={index}
-                    class="col-md-3"
-                    style={{ marginBottom: "21px" }}
-                  >
-                    <div class="card">
-                      <img
-                        class="card-img-top"
-                        src={`assets/images/${val.imageUrl}`}
-                        alt="Card image"
-                      />
-                      <div class="card-body">
-                        <h4 class="card-title"> {val.medicineName}</h4>
-                        <h4 class="card-title">
-                          <select
-                            id="productQuantity"
-                            className="form-control"
-                            onChange={(e) => setOrderQuantity(e.target.value)}>
-                              <option value="-1">Select Quantity</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                          </select>
-                        </h4>
-                        <button class="btn btn-primary" onClick={(e)=> handleAddToCart(e,val.id)}>Add to cart</button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            : "Loading products..."}
-        </div>
-      </div>
+  const RemoveToCart = async (productId) => {
     
-</>
-    );
+    try {
+      await axios.delete(`http://localhost:5013/api/Product/RemoveToCart/${productId}`);
+      alert('Product removed from cart');
+    } catch (err) {
+      console.error('Error removing from cart:', err);
+      alert('Failed to remove product from cart');
+    }
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
+
+  return (
+    <>
+    <Header/>
+    <div className='container my-4'>
+      <h2>Product Display</h2>
+      </div>
+      <table
+          className="table stripped table-hover "
+          style={{ backgroundColor: "white" }}
+        >
+          <thead className="thead-dark">
+          <tr>
+            <th>ProductId</th>
+            <th>ProductName</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>ImageUrl</th>
+            <th>CategoryId</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.length > 0 ? (
+            products.map((product) => (
+              <tr key={product.productId}>
+                <td>{product.productId}</td>
+                <td>{product.productName}</td>
+                <td>{product.description}</td>
+                <td>{product.price}</td>
+                <td>{product.quantity}</td>
+                <td>
+                  {product.imageUrl && product.imageUrl !== '""' ? (
+                    <img src={product.imageUrl} alt={product.productName} width="100" />
+                  ) : (
+                    <span>No Image</span>
+                  )}
+                </td>
+                <td>{product.categoryId}</td>
+                <td>
+                  <button  class="btn btn-primary"
+                    type="submit" onClick={() => AddToCart(product.productId)}>AddToCart</button>
+                  <button  class="btn btn-danger"
+                    type="submit" onClick={() => RemoveToCart(product.productId)} style={{ marginLeft: "10px" }}>RemoveFromCart</button>
+                </td>
+
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="7">No products found</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </>
+  );
 };
+
 export default ProductDisplay;
